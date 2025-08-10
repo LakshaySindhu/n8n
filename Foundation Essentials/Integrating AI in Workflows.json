@@ -1,0 +1,337 @@
+{
+  "name": "Integrating AI in Workflows",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Find Your Perfect Property",
+        "formDescription": "Please fill out this form to help us understand your property requirements and preferences. The information you provide will allow our team to recommend suitable properties and guide you through the buying process. All details will be kept confidential and used solely for assisting you with your property search.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Full Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email Address",
+              "fieldType": "email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Phone Number",
+              "fieldType": "number",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Property Type",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Apartment "
+                  },
+                  {
+                    "option": "Villa"
+                  },
+                  {
+                    "option": "Plot"
+                  },
+                  {
+                    "option": "Commercial Services"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Preferred Location",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Delhi"
+                  },
+                  {
+                    "option": "Noida"
+                  },
+                  {
+                    "option": "Gurgaon"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Budget Range (in Rs)",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Number of Bedrooms",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "1 BHK"
+                  },
+                  {
+                    "option": "2 BHK"
+                  },
+                  {
+                    "option": "3 BHK"
+                  },
+                  {
+                    "option": "4 BHK"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Additionals Details (If any)"
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -112,
+        -48
+      ],
+      "id": "0e8dfad5-f339-44fd-94c1-1ff9263695d9",
+      "name": "On form submission",
+      "webhookId": "59fc500a-161e-4b2c-9109-1a9fd961d6ad"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1NTskfvblBFEvFDsiYFHUiYNnS1hVIWk0f6IYzpWkmUk",
+          "mode": "list",
+          "cachedResultName": "Find your perfect property",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1NTskfvblBFEvFDsiYFHUiYNnS1hVIWk0f6IYzpWkmUk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1NTskfvblBFEvFDsiYFHUiYNnS1hVIWk0f6IYzpWkmUk/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Full Name": "={{ $json['Full Name'] }}",
+            "Email Address": "={{ $json['Email Address'] }}",
+            "Phone Number": "={{ $json['Phone Number'] }}",
+            "Property Type": "={{ $json['Property Type'] }}",
+            "Preferred Location": "={{ $json['Preferred Location'] }}",
+            "Budget Range": "={{ $json['Budget Range (in Rs)'] }}",
+            "Number of Bedrooms": "={{ $json['Number of Bedrooms'] }}",
+            "Additional Details": "={{ $json['Additionals Details (If any)'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Full Name",
+              "displayName": "Full Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email Address",
+              "displayName": "Email Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone Number",
+              "displayName": "Phone Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Property Type",
+              "displayName": "Property Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Preferred Location",
+              "displayName": "Preferred Location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Budget Range",
+              "displayName": "Budget Range",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Number of Bedrooms",
+              "displayName": "Number of Bedrooms",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Additional Details",
+              "displayName": "Additional Details",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        96,
+        -48
+      ],
+      "id": "5c36468f-75eb-47ef-924b-f91817ba89da",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "9fcrAJuZ5ZkpxXiY",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an email writer who writes amazing sales emails for potential properties clients . So write an email using the details provided \n\nFull Name : {{ $json['Full Name'] }}\nEmail Address : {{ $json['Email Address'] }}\nPhone Number : {{ $json['Phone Number'] }}\nProperty Type : {{ $json['Property Type'] }}\nPreferred Location : {{ $json['Preferred Location'] }}\nBudget Range in Rs : {{ $json['Budget Range'] }}\nNumber of Bedrooms : {{ $json['Number of Bedrooms'] }}\nAdditional Details : {{ $json['Additional Details'] }}\n\nProvide me the email in format given below : \n\n{\n\"subject\" : \n\"body\" : \n}\n\nand also provide me the body context in html formatted manner so that i can send this via an api to send email to potential customers.\n\n"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        304,
+        -48
+      ],
+      "id": "e234b375-362f-4914-a2b5-87a0bc6ee462",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "ADyr3RN78MImJXka",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "raygaming04399@gmail.com",
+        "subject": "={{ $json.message.content.subject }}",
+        "message": "={{ $json.message.content.body }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        656,
+        -48
+      ],
+      "id": "b03c74ee-9ba7-4041-b314-6f0256c2751f",
+      "name": "Send a message",
+      "webhookId": "e6903924-6bc8-495a-81d1-8c4f619eb602",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "GlIARfqfWQwXkPOt",
+          "name": "Gmail account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "9399ae28-6d32-4d56-9aa9-5f36d5434f54",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5eb32f940e5aa1e6cc5a15b962ef59186c711434746b1e6835bc7518afd86f4a"
+  },
+  "id": "9isWOuktAArsCFYs",
+  "tags": []
+}

@@ -1,0 +1,252 @@
+{
+  "name": "RAG Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        272,
+        -208
+      ],
+      "id": "a911bf99-27ac-4bf3-8a95-9f1b3114788b",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "5juO9uzeZEr3Y3CT",
+          "name": "developwithlakshay@gmail.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1adDDG9QlX9MGkMhFqtHBL0JZmBQDMpoo",
+          "mode": "list",
+          "cachedResultName": "RAG n8n Folder",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1adDDG9QlX9MGkMhFqtHBL0JZmBQDMpoo"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        48,
+        -208
+      ],
+      "id": "c8b1a61d-c3c7-4b05-9f8c-fed8b160e2db",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "5juO9uzeZEr3Y3CT",
+          "name": "developwithlakshay@gmail.com"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "n8n",
+          "mode": "list",
+          "cachedResultName": "n8n"
+        },
+        "options": {
+          "pineconeNamespace": "Jane Street"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        528,
+        -208
+      ],
+      "id": "0318021f-3965-49ac-af3c-beabbbdaf43c",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "RVWePZFdlGfNqVmE",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "dimensions": 512
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        480,
+        16
+      ],
+      "id": "98c08065-6b02-4e2d-964e-f1e8d195727e",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "ADyr3RN78MImJXka",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "textSplittingMode": "custom",
+        "options": {
+          "splitPages": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        640,
+        0
+      ],
+      "id": "fa203a5e-2ca2-44b6-8649-82abad7550e8",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        768,
+        160
+      ],
+      "id": "5d80984c-9b57-4df7-9840-0d52d1fc1482",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "content": "## Points to Remember\n\n1. Dimensions in Pinecone Index must be selected properly while  creating an index.\n\n2. Ensure the value of dimensions of Pinecone index and Embedding Model response dimension must be same.\n",
+        "height": 240,
+        "width": 304
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1008,
+        -208
+      ],
+      "typeVersion": 1,
+      "id": "c3bdc3d3-e0e1-4403-8c47-5f839349effb",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ae1cb419-52dc-4822-8949-444e243668ff",
+  "meta": {
+    "instanceId": "5eb32f940e5aa1e6cc5a15b962ef59186c711434746b1e6835bc7518afd86f4a"
+  },
+  "id": "TKqsseXsGzRw9iRb",
+  "tags": [
+    {
+      "name": "Google Drive",
+      "id": "20qgFnh6qvjnAR1N",
+      "createdAt": "2025-08-07T15:52:05.434Z",
+      "updatedAt": "2025-08-07T15:52:05.434Z"
+    },
+    {
+      "name": "VectorDB",
+      "id": "8zeAFohJOKSKbLuy",
+      "createdAt": "2025-08-07T15:52:00.652Z",
+      "updatedAt": "2025-08-07T15:52:00.652Z"
+    },
+    {
+      "name": "Pinecone",
+      "id": "EnZBHCA77GlWHmeq",
+      "createdAt": "2025-08-07T15:52:16.150Z",
+      "updatedAt": "2025-08-07T15:52:16.150Z"
+    },
+    {
+      "name": "RAG",
+      "id": "VSMs69XjrDVJJSs6",
+      "createdAt": "2025-08-07T15:51:53.777Z",
+      "updatedAt": "2025-08-07T15:51:53.777Z"
+    }
+  ]
+}

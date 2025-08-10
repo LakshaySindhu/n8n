@@ -1,0 +1,386 @@
+{
+  "name": "Task Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "=You are an AI assistant that manages tasks in Google Tasks and generates confirmation or task list messages to be sent via Telegram.\n\nAvailable Actions:\nCreate Task Node – Adds a new task with title, optional description, due date, and list name. (Use “Create a task in Google Task” Tool)\n\nUpdate Task Node – Modifies an existing task’s details (title, description, due date, completion status, or list). (Use “Update a task in Google Task” Tool)\n\nDelete Task Node – Permanently removes a task from Google Tasks. (Use “Delete a task in Google Task” Tool)\n\nFetch Tasks Node – Retrieves multiple tasks from Google Tasks, optionally filtered by list, due date, or completion status. (Use “Get Many tasks in Google Task” Tool)\n\nBehavior Guidelines:\nUnderstand Intent – Determine if the user wants to create, update, delete, or fetch tasks.\n\nExtract Details – Capture from natural language:\n\nTitle (mandatory for create/update/delete)\n\nDescription, Due Date, List Name, Completion Status (optional)\n\nAction Execution:\n\nCreate Task: Directly create using the Create Task Node.\n\nUpdate Task:\n\nFirst, use Fetch Tasks Node to get all tasks.\n\nSearch for the task by matching the provided title.\n\nIf a match is found → Get its Task ID and call Update Task Node.\n\nIf no match is found → Generate a response message asking for clarification.\n\nDelete Task:\n\nSame as Update → Fetch → Match → Use Task ID to delete.\n\nGenerate Response Text:\n\nFor Create/Update/Delete → Generate a confirmation message.\n\nFor Fetch → Generate a formatted list of tasks with title, due date, and status.\n\nIf task not found → Generate a “Task not found” message.\n\nClarification: If multiple tasks match, generate a message asking the user to specify which one.\n\nOnly output text responses for Telegram; do not directly send messages.\n\nWhen a user asks to mark a task as completed or set it to needsAction, do not use the Update_a_task_in_Google_Tasks tool.\n\nInstead, automatically construct an HTTP PATCH request to the Google Tasks API using only the provided Task_ID:\n\nURL Template:\n\nbash\nCopy\nEdit\nhttps://www.googleapis.com/tasks/v1/lists/OWVaTFQ2N1BvSURaZ0JIMw/tasks/{Task_ID}\nRequest Body:\n\nIf marking completed:\n\njson\nCopy\nEdit\n{\n  \"status\": \"completed\"\n}\nIf reverting to active:\n\njson\nCopy\nEdit\n{\n  \"status\": \"needsAction\"\n}\nUse OAuth2 authentication with existing Google credentials in n8n.\n\nThe model must generate both the URL and the body dynamically based solely on the task’s Task_ID and the desired status from the user’s request.\n\nFor updates to title or notes only, continue using the Update_a_task_in_Google_Tasks tool instead of PATCH\n\n✅ Examples of Generated Responses\nCreate: “✅ Task ‘Call the doctor’ added successfully for tomorrow.”\n\nUpdate:\n\n(Found) → “✏️ Task ‘Finish report’ updated with new due date Monday.”\n\n(Not Found) → “⚠️ I couldn’t find a task named ‘Finish report’. Please check the title.”\n\nDelete:\n\n(Found) → “🗑️ Task ‘Buy groceries’ has been deleted.”\n\n(Not Found) → “⚠️ No task found with the name ‘Buy groceries’.”\n\nFetch:\n\nmathematica\nCopy\nEdit\n📋 Here are your tasks for today:\n1️⃣ Call the doctor (Due: Today)\n2️⃣ Buy groceries (Due: Today)"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        592,
+        0
+      ],
+      "id": "561e598a-bece-4afc-abae-286a0a5cb35e",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        352,
+        224
+      ],
+      "id": "6a12fa5e-323a-4989-a946-ad5efa8eddcb",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "EMCUvlpjuO2tkJu7",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "task": "OWVaTFQ2N1BvSURaZ0JIMw",
+        "title": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Title', ``, 'string') }}",
+        "additionalFields": {
+          "notes": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Notes', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleTasksTool",
+      "typeVersion": 1,
+      "position": [
+        624,
+        224
+      ],
+      "id": "fe1d3c33-0765-47bb-bd70-73472bf7a126",
+      "name": "Create a task in Google Tasks",
+      "credentials": {
+        "googleTasksOAuth2Api": {
+          "id": "YPEr1WQU72beDMcJ",
+          "name": "Google Tasks account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "task": "OWVaTFQ2N1BvSURaZ0JIMw",
+        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.googleTasksTool",
+      "typeVersion": 1,
+      "position": [
+        752,
+        224
+      ],
+      "id": "cad09851-1ebe-46c4-9423-592af373d8e4",
+      "name": "Get many tasks in Google Tasks",
+      "credentials": {
+        "googleTasksOAuth2Api": {
+          "id": "YPEr1WQU72beDMcJ",
+          "name": "Google Tasks account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "task": "OWVaTFQ2N1BvSURaZ0JIMw",
+        "taskId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Task_ID', ``, 'string') }}",
+        "updateFields": {
+          "notes": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Notes', ``, 'string') }}",
+          "title": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Title', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleTasksTool",
+      "typeVersion": 1,
+      "position": [
+        880,
+        224
+      ],
+      "id": "3c7fd9f9-a1fa-48f1-bcc0-5e1b14c6b60a",
+      "name": "Update a task in Google Tasks",
+      "credentials": {
+        "googleTasksOAuth2Api": {
+          "id": "YPEr1WQU72beDMcJ",
+          "name": "Google Tasks account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        32,
+        0
+      ],
+      "id": "7346d27f-2626-42de-8bdd-0eb50fda400d",
+      "name": "Telegram Trigger",
+      "webhookId": "dafa4f5f-5d02-495e-bb16-6ce8412b075a",
+      "credentials": {
+        "telegramApi": {
+          "id": "m28koPv0birDpF1Q",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "15c03025-01d4-43c7-ac59-8cffb99f61b8",
+              "name": "message.chat.id",
+              "value": "={{ $json.message.chat.id }}",
+              "type": "number"
+            },
+            {
+              "id": "3fd51bc6-9bca-49fe-9087-fbdbab52d785",
+              "name": "message.text",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        256,
+        0
+      ],
+      "id": "068612d5-601a-4f50-b186-21551f7ec734",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Edit Fields').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1120,
+        0
+      ],
+      "id": "60618928-a176-4585-ae15-624ab0f6a9fc",
+      "name": "Send a text message",
+      "webhookId": "baf1930e-7deb-4ee2-9f80-bad6db83d017",
+      "credentials": {
+        "telegramApi": {
+          "id": "m28koPv0birDpF1Q",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "task": "OWVaTFQ2N1BvSURaZ0JIMw",
+        "taskId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Task_ID', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.googleTasksTool",
+      "typeVersion": 1,
+      "position": [
+        1008,
+        224
+      ],
+      "id": "4b8529da-d565-41e4-9e37-ecbbfee1c55f",
+      "name": "Delete a task in Google Tasks",
+      "credentials": {
+        "googleTasksOAuth2Api": {
+          "id": "YPEr1WQU72beDMcJ",
+          "name": "Google Tasks account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Edit Fields').item.json.message.chat.id }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        496,
+        224
+      ],
+      "id": "9769bde4-a59e-4ff3-b60c-428892f7fea7",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('URL', ``, 'string') }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleTasksOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('JSON', ``, 'json') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        1136,
+        240
+      ],
+      "id": "05ad9673-2524-4d89-a017-9b5d03b364b5",
+      "name": "HTTP Request",
+      "credentials": {
+        "googleTasksOAuth2Api": {
+          "id": "YPEr1WQU72beDMcJ",
+          "name": "Google Tasks account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a task in Google Tasks": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many tasks in Google Tasks": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a task in Google Tasks": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete a task in Google Tasks": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "dbcb6610-4629-4ad8-a0e1-dcd26aa8ea68",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5eb32f940e5aa1e6cc5a15b962ef59186c711434746b1e6835bc7518afd86f4a"
+  },
+  "id": "9J85a3vCAaaDlpal",
+  "tags": [
+    {
+      "createdAt": "2025-08-03T16:34:40.971Z",
+      "updatedAt": "2025-08-03T16:34:40.971Z",
+      "id": "OBF6pBX980k2Dt2t",
+      "name": "Agent"
+    },
+    {
+      "createdAt": "2025-08-03T16:34:55.998Z",
+      "updatedAt": "2025-08-03T16:34:55.998Z",
+      "id": "v6440dsuBnR0NiIe",
+      "name": "Task"
+    }
+  ]
+}

@@ -1,0 +1,345 @@
+{
+  "name": "Master Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -336,
+        -16
+      ],
+      "id": "a432867c-f04c-4204-a6c6-7b2704bc7fab",
+      "name": "Telegram Trigger",
+      "webhookId": "18ed5c7c-b903-4502-bfc0-4a732869c878",
+      "credentials": {
+        "telegramApi": {
+          "id": "FTAlDVpnwCcqtO4V",
+          "name": "Master Agent Buddy"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f98ef275-ac79-472a-a14f-5b6f2ef4cfc3",
+              "name": "message.chat.id",
+              "value": "={{ $json.message.chat.id }}",
+              "type": "number"
+            },
+            {
+              "id": "a9358f14-1933-4d6b-9a2d-59029bf0e1a2",
+              "name": "message.text",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -128,
+        -16
+      ],
+      "id": "f2094df7-c6ad-4330-995f-6725ecad729d",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "=You are a Master AI Assistant that can both answer general questions and manage tasks and calendar events through n8n workflows.\nYour goal is to understand user intent, call the appropriate tool when needed, and always generate a formatted message that can be sent back to the user via Telegram.\n\nAvailable Tools\nTasks Workflow Tool: Handles Google Tasks operations (create, update, delete, fetch, mark completed/active).\n\nCalendar Workflow Tool: Handles Google Calendar events (create, update, delete, fetch upcoming events).\n\nBehavior Guidelines\nIntent Detection:\n\nTasks-related: If the user mentions tasks (e.g., “Add a task,” “Mark as done,” “List my tasks”), use Tasks Workflow Tool.\n\nCalendar-related: If the user mentions events (e.g., “Schedule a meeting,” “Cancel an event,” “Show my meetings”), use Calendar Workflow Tool.\n\nGeneral queries: If unrelated to tasks or calendar (e.g., “Explain how n8n works,” “What is the time now?”), answer directly without tools.\n\nInformation Extraction:\n\nFor task or calendar requests, capture title, description, due date/time, attendees, list name, and completion status.\n\nSend this data to the appropriate workflow tool.\n\nWorkflow Execution:\n\nDo not directly call Google APIs.\n\nUse only the appropriate tool to handle task or calendar requests.\n\nResponse Generation:\n\nAfter using a tool, generate a clean, concise message confirming the action or listing results (e.g., “✅ Task ‘Buy milk’ created for tomorrow.”).\n\nFor general questions, generate a direct, conversational response.\n\nEnsure all responses are Telegram-friendly (plain text, emojis optional, no system formatting).\n\nClarifications:\n\nIf intent is unclear or multiple tasks/events match, ask the user for clarification before taking action.\n`\nCurrent date and time : {{ $now }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        80,
+        -16
+      ],
+      "id": "a4809bf1-f95b-40fe-bd9d-5004b446c020",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        192
+      ],
+      "id": "f96458ef-72bd-41b1-a91c-ed8e7c6c21c6",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "EMCUvlpjuO2tkJu7",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.message.chat.id }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        128,
+        192
+      ],
+      "id": "37efbb89-3a6e-4c79-b1c1-d813ba72a456",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "description": "This tool triggers the Calendar Agent workflow in n8n, handling Google Calendar events. It can create, update, delete, and retrieve events.\n\nInputs: Natural language commands for calendar operations (e.g., “Schedule a meeting,” “Cancel tomorrow’s event,” “List my meetings”).\n\nBehavior:\n\nIdentifies event management requests.\n\nHandles event creation, modification (time, title, description, attendees), deletion, and fetching upcoming events.\n\nOutput: Produces a structured, Telegram-friendly confirmation or event list message.",
+        "workflowId": {
+          "__rl": true,
+          "value": "89LVlT3YxzxIXP5b",
+          "mode": "list",
+          "cachedResultName": "learn-n8n — Multi Agentic Workflow - Calendar Agent"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Text', ``, 'string') }}",
+            "sessionId": "={{ $('Telegram Trigger').item.json.message.chat.id }}"
+          },
+          "matchingColumns": [
+            "Text"
+          ],
+          "schema": [
+            {
+              "id": "Text",
+              "displayName": "Text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "sessionId",
+              "displayName": "sessionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        464,
+        192
+      ],
+      "id": "53ba6d51-eb03-4c77-83d8-4b2e7c5c067f",
+      "name": "Calendar Workflow Tool"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        464,
+        -16
+      ],
+      "id": "866ae702-2916-4a3e-9a4d-eefc160b4c27",
+      "name": "Send a text message",
+      "webhookId": "00ca9934-db42-4217-8e0b-e9410341dbd0",
+      "credentials": {
+        "telegramApi": {
+          "id": "FTAlDVpnwCcqtO4V",
+          "name": "Master Agent Buddy"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "This tool triggers the Tasks Agent workflow in n8n, managing Google Tasks. It can create, update, delete, fetch, and mark tasks as completed or active.\n\nInputs: Natural language instructions about task management (e.g., “Create a task,” “Mark task as done,” “List my tasks”).\n\nBehavior:\n\nDetects task-related actions.\n\nHandles task creation, updating (title, description, due date), deletion, and fetching.\n\nUses PATCH requests to mark tasks completed or revert to active.\n\nOutput: Returns a formatted, Telegram-ready confirmation or task list message.",
+        "workflowId": {
+          "__rl": true,
+          "value": "OhzUs3WxplHZxKux",
+          "mode": "list",
+          "cachedResultName": "learn-n8n — Multi Agentic Workflow - Task Agent"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Text', ``, 'string') }}",
+            "sessionId": "={{ $('Telegram Trigger').item.json.message.chat.id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Text",
+              "displayName": "Text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "sessionId",
+              "displayName": "sessionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        288,
+        192
+      ],
+      "id": "857de2e8-e498-48b0-9e7a-67a9610328b6",
+      "name": "Tasks Workflow Tool"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calendar Workflow Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tasks Workflow Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "032cc9c7-85d0-4083-a349-c830a7a2e66e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5eb32f940e5aa1e6cc5a15b962ef59186c711434746b1e6835bc7518afd86f4a"
+  },
+  "id": "8GPLg48rDvsSb6Wq",
+  "tags": [
+    {
+      "createdAt": "2025-08-03T16:34:40.971Z",
+      "updatedAt": "2025-08-03T16:34:40.971Z",
+      "id": "OBF6pBX980k2Dt2t",
+      "name": "Agent"
+    },
+    {
+      "createdAt": "2025-08-06T11:53:38.460Z",
+      "updatedAt": "2025-08-06T11:53:38.460Z",
+      "id": "dv1g6uMgfKswnp35",
+      "name": "Master"
+    },
+    {
+      "createdAt": "2025-08-03T16:35:00.429Z",
+      "updatedAt": "2025-08-03T16:35:00.429Z",
+      "id": "nhpXp6ZjhiPDlide",
+      "name": "Multi Agent"
+    }
+  ]
+}

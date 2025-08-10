@@ -1,0 +1,312 @@
+{
+  "name": "Multi Agentic Workflow - Calendar Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.Text }}",
+        "options": {
+          "systemMessage": "=You are an AI assistant that manages events in Google Calendar.\n\nCurrent Date and Time: {{ $now }}\n\nAvailable Actions:\nCreate Event Node – Adds a new calendar event with summary, description, start/end time, location, and calendar selection. (Use “Create Event in Google Calendar” Tool)\n\nUpdate Event Node – Modifies details of an existing event (summary, description, time, attendees, or location). (Use “Update Event in Google Calendar” Tool)\n\nDelete Event Node – Permanently removes an event from Google Calendar. (Use “Delete Event in Google Calendar” Tool)\n\nFetch Events Node – Retrieves events from Google Calendar, optionally filtered by date, calendar, or status. (Use “Get Many Events in Google Calendar” Tool)\n\nBehavior Guidelines:\nUnderstand Intent: Determine if the user wants to create, update, delete, or fetch calendar events.\n\nExtract Details: From natural language, capture:\n\nSummary/Title (mandatory for create/update/delete)\n\nDescription, Date/Time, Location, Calendar Name, Attendees (optional)\n\nAction Execution:\nCreate Event: Directly create using Create Event Node.\n\nUpdate Event:\n\nFirst, use Fetch Events Node to get upcoming events.\n\nSearch for the matching event by title and/or time.\n\nIf a match is found → Get its Event ID and call Update Event Node.\n\nIf no match → Output a “not found” message.\n\nDelete Event:\n\nSame as update → Fetch → Match → Delete with Event ID.\n\nResponse Behavior:\nFor Create/Update/Delete → Output a confirmation message.\n\nFor Fetch → Output a formatted list of upcoming events with date, time, and status.\n\nIf event not found → Output a “not found” message.\n\nIf multiple events match → Ask for clarification (specify date/time).\n\n✅ Examples of Responses:\n\nCreate: ✅ Event 'Team Meeting' scheduled for Aug 5th, 3–4 PM.\n\nUpdate (Found): ✏️ Event 'Project Kickoff' updated to Aug 10th, 2 PM.\n\nUpdate (Not Found): ⚠️ I couldn’t find an event named 'Project Kickoff'. Please check the details.\n\nDelete (Found): 🗑️ Event 'Doctor Appointment' has been deleted.\n\nDelete (Not Found): ⚠️ No event found with the name 'Doctor Appointment'.\n\nFetch:\nYour upcoming events:\n1️⃣ Team Meeting – Aug 5th, 3–4 PM\n2️⃣ Client Call – Aug 6th, 11 AM"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        144,
+        -32
+      ],
+      "id": "ca2ed277-cd2d-486a-abea-2f85c136e870",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        192
+      ],
+      "id": "eed204ff-9f0d-4cb9-87d0-d7004bf2abe9",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "EMCUvlpjuO2tkJu7",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.sessionId }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        64,
+        192
+      ],
+      "id": "00b1d286-4da9-4541-a48c-fd522f7ee20a",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "developwithlakshay@gmail.com",
+          "mode": "list",
+          "cachedResultName": "developwithlakshay@gmail.com"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "additionalFields": {
+          "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}",
+          "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        208,
+        192
+      ],
+      "id": "376422e9-4e44-46ff-b9cf-99361a235d62",
+      "name": "Create an event in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "MM3Clo2kRzaez8VS",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "developwithlakshay@gmail.com",
+          "mode": "list",
+          "cachedResultName": "developwithlakshay@gmail.com"
+        },
+        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}",
+        "timeMin": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('After', ``, 'string') }}",
+        "timeMax": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Before', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        368,
+        192
+      ],
+      "id": "9aafe3b2-37aa-4f4f-8290-9cb43232d4ca",
+      "name": "Get many events in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "MM3Clo2kRzaez8VS",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Calendar', ``, 'string') }}",
+          "mode": "id",
+          "__regex": "(^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*)"
+        },
+        "eventId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_ID', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        528,
+        192
+      ],
+      "id": "2e5be810-a296-492d-a90d-6286788a5ffd",
+      "name": "Delete an event in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "MM3Clo2kRzaez8VS",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "calendar": {
+          "__rl": true,
+          "value": "developwithlakshay@gmail.com",
+          "mode": "list",
+          "cachedResultName": "developwithlakshay@gmail.com"
+        },
+        "eventId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_ID', ``, 'string') }}",
+        "updateFields": {
+          "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}",
+          "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+          "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+          "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        688,
+        192
+      ],
+      "id": "4bfd7cb4-2c1c-46b6-9847-a13c313665ff",
+      "name": "Update an event in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "MM3Clo2kRzaez8VS",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "Text"
+            },
+            {
+              "name": "sessionId",
+              "type": "number"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -160,
+        -32
+      ],
+      "id": "c0d6e163-2c95-48b5-87a4-93d8d5689f9b",
+      "name": "When Executed by Another Workflow"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete an event in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update an event in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d5c84252-e7e8-4086-93d8-cecbabbe60dd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5eb32f940e5aa1e6cc5a15b962ef59186c711434746b1e6835bc7518afd86f4a"
+  },
+  "id": "89LVlT3YxzxIXP5b",
+  "tags": [
+    {
+      "createdAt": "2025-08-03T16:34:40.971Z",
+      "updatedAt": "2025-08-03T16:34:40.971Z",
+      "id": "OBF6pBX980k2Dt2t",
+      "name": "Agent"
+    },
+    {
+      "createdAt": "2025-08-04T13:44:21.446Z",
+      "updatedAt": "2025-08-04T13:44:21.446Z",
+      "id": "UkfTD8JknWlpUyhc",
+      "name": "Calendar Agent"
+    },
+    {
+      "createdAt": "2025-08-03T16:35:00.429Z",
+      "updatedAt": "2025-08-03T16:35:00.429Z",
+      "id": "nhpXp6ZjhiPDlide",
+      "name": "Multi Agent"
+    }
+  ]
+}

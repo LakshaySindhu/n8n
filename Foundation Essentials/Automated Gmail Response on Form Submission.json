@@ -1,0 +1,213 @@
+{
+  "name": "Automated Gmail Response on Form Submission",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Testing Form - n8n ",
+        "formDescription": "This form is primarily created to test n8n form and get hands on with n8n nodes, its workflow and triggers",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Full Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "UID",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Date of Birth",
+              "fieldType": "date"
+            },
+            {
+              "fieldLabel": "Course",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "BE/BTech"
+                  },
+                  {
+                    "option": "BBA/BCOM"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -288,
+        -32
+      ],
+      "id": "30d1429a-262f-4e33-87fe-74e029b1359b",
+      "name": "On form submission",
+      "webhookId": "85ef5325-00c4-48e3-9109-01404f620366"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1eeeLwIrjFCFM4bgS666WC7bH2QJ1C4snPQc1LRysM3A",
+          "mode": "list",
+          "cachedResultName": "n8n Form Testing Details",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1eeeLwIrjFCFM4bgS666WC7bH2QJ1C4snPQc1LRysM3A/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1eeeLwIrjFCFM4bgS666WC7bH2QJ1C4snPQc1LRysM3A/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Full Name": "={{ $json['Full Name'] }}",
+            "UID": "={{ $json.UID }}",
+            "DOB": "={{ $json['Date of Birth'] }}",
+            "Course": "={{ $json.Course }}",
+            "Email": "={{ $json.Email }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Full Name",
+              "displayName": "Full Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "UID",
+              "displayName": "UID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "DOB",
+              "displayName": "DOB",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Course",
+              "displayName": "Course",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -64,
+        -32
+      ],
+      "id": "e9f321b8-6d60-49a7-95fe-fc4fc6db3d08",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "9fcrAJuZ5ZkpxXiY",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.Email }}",
+        "subject": "Details Received Sucessfully",
+        "emailType": "text",
+        "message": "=Hey {{ $json[\"Full Name\"] }} \nThanks for Submitting your details. We will get back to you shortly.\n\nRegards \nLakshay Sindhu\nFounder \nautomatewithRay.com",
+        "options": {
+          "appendAttribution": false,
+          "replyToSenderOnly": true
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        160,
+        -32
+      ],
+      "id": "ab673c1a-2f38-4b86-9257-ac25381c0dbd",
+      "name": "Send a message",
+      "webhookId": "12e0cc4d-9603-4580-b9e0-311024db9ef0",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "GlIARfqfWQwXkPOt",
+          "name": "Gmail account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ea87f7a2-f580-49c7-8c19-488b434b6db4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5eb32f940e5aa1e6cc5a15b962ef59186c711434746b1e6835bc7518afd86f4a"
+  },
+  "id": "AioF6I5nXyeRMHRE",
+  "tags": []
+}
