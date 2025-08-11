@@ -81,7 +81,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "Bearer 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"
+              "value": "Bearer "
             }
           ]
         },
